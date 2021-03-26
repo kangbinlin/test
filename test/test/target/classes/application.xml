@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+			http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!-- 导入数据库连接  -->
+    <context:property-placeholder location="classpath:jdbc.properties" system-properties-mode="NEVER"/>
+
+    <!-- 开启注解扫描：扫描除了Controller以外的组件-->
+    <context:component-scan base-package="com._520it.crm">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!-- 配置数据库连接池 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!-- sessionFactory：和transactionManager什么关系？ -->
+    <bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- 数据源-->
+        <property name="dataSource" ref="dataSource"/>
+        <!-- mybatis配置文件-->
+        <property name="configLocation" value="classpath:mybatis.cfg.xml"/>
+        <!-- mybatis映射文件-->
+        <property name="mapperLocations" value="classpath:com/_520it/crm/mapper/*Mapper.xml"/>
+    </bean>
+
+    <!-- 事务管理器  -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- 事务模板：设置事务的一些属性-->
+    <tx:advice id="advice">
+        <tx:attributes>
+            <!--设置所有读操作的事务为SUPPORRS，如果没有事务就不开启新事务-->
+            <tx:method name="get*" read-only="true" propagation="SUPPORTS"/>
+            <tx:method name="select*" read-only="true" propagation="SUPPORTS"/>
+            <tx:method name="query*" read-only="true" propagation="SUPPORTS"/>
+            <tx:method name="list*" read-only="true" propagation="SUPPORTS"/>
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <bean id="logUtil" class="com._520it.crm.util.LogUtil"></bean>
+
+    <!-- AOP相关配置：这个就是把事务工具类当做AOP的一个adviser，加入到责任链中-->
+    <aop:config>
+        <aop:pointcut id="crudPointCut" expression="execution(* com._520it.crm.service.*Service.*(..))"/>
+        <aop:advisor advice-ref="advice" pointcut-ref="crudPointCut"/>
+        <aop:aspect ref="logUtil">
+            <aop:after method="writeLog" pointcut-ref="crudPointCut"/>
+        </aop:aspect>
+    </aop:config>
+
+
+    <!-- mapper接口的扫描器：这里指定了某个包下的java文件都是mapper。如果是注解方式，它是全路径扫描，但是只认@Mapper-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com._520it.crm.mapper"/>
+    </bean>
+
+
+</beans>

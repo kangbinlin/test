@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com._520it.crm.mapper.LogMapper" >
+
+  <resultMap id="BaseResultMap" type="com._520it.crm.domain.Log" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+<!--    <result column="opUser_id" property="opuserId" jdbcType="BIGINT" />-->
+    <result column="opTime" property="optime" jdbcType="TIMESTAMP" />
+    <result column="opIp" property="opip" jdbcType="VARCHAR" />
+    <result column="function" property="function" jdbcType="VARCHAR" />
+    <result column="params" property="params" jdbcType="VARCHAR" />
+<!--    <association property="opuser" javaType="com._520it.crm.domain.Employee" columnPrefix="e_">-->
+<!--      <id column="id" property="id"/>-->
+<!--      <result column="name" property="username"/>-->
+<!--    </association>-->
+  </resultMap>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from log
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <insert id="insert" parameterType="com._520it.crm.domain.Log" useGeneratedKeys="true" keyProperty="id" >
+    insert into log (opUser_id, opTime, opIp, function, params)
+    values (#{opuser.id,jdbcType=BIGINT}, #{optime,jdbcType=TIMESTAMP}, #{opip,jdbcType=VARCHAR}, #{function,jdbcType=VARCHAR}, #{params,jdbcType=VARCHAR})
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com._520it.crm.domain.Log" >
+    update log
+    set opUser_id = #{opuser.id,jdbcType=BIGINT},
+      opTime = #{optime,jdbcType=TIMESTAMP},
+      opIp = #{opip,jdbcType=VARCHAR},
+      function = #{function,jdbcType=VARCHAR},
+      params = #{params,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select id, opUser_id, opTime, opIp, function, params
+    from log
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, opUser_id, opTime, opIp, function, params
+    from log
+  </select>
+
+</mapper>

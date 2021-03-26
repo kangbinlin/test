@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:c="http://www.w3.org/1999/XSL/Transform"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+        version="2.0">
+
+    <description>CRM函数库</description>
+    <display-name>客户关系管理系统</display-name>
+    <tlib-version>1.1</tlib-version>
+    <short-name>myFn</short-name>
+    <uri>http://www.520it.com/crm/permission</uri>
+
+    <function>
+        <description>
+            用户权限控制
+        </description>
+        <name>checkPermission</name>
+        <function-class>com._520it.crm.util.PermissionUtil</function-class>
+        <function-signature>boolean checkPermission(java.lang.String)</function-signature>
+        <example>
+           ${myFn:checkPermission('哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈')}
+        </example>
+    </function>
+
+
+</taglib>

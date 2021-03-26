@@ -1,0 +1,3 @@
+右键maven项目，build....,输入下面命令，自动根据generator配置文件生成bean和mapper.xml/java
+mybatis-generator:generate
+

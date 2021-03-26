@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com._520it.crm.mapper.PermissionMapper">
+
+    <resultMap id="BaseResultMap" type="com._520it.crm.domain.Permission">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="resource" property="resource" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from permission
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+
+    <insert id="insert" parameterType="com._520it.crm.domain.Permission" useGeneratedKeys="true" keyProperty="id">
+    insert into permission (name, resource)
+    values (#{name,jdbcType=VARCHAR}, #{resource,jdbcType=VARCHAR})
+  </insert>
+
+    <update id="updateByPrimaryKey" parameterType="com._520it.crm.domain.Permission">
+    update permission
+    set name = #{name,jdbcType=VARCHAR},
+      resource = #{resource,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    select id, name, resource
+    from permission
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+    select id, name, resource
+    from permission
+  </select>
+
+    <!--高级查询条件-->
+    <sql id="where_sql">
+        <!--先根据rid查询当前角色所有的权限的id，再根据这些权限id查询对应的权限全记录-->
+        <where>
+            <if test="rid != null">
+                id in (select p_id from role_permission where r_id = #{rid})
+            </if>
+            <if test="keyword != null">
+                (
+                 name like concat('%', #{keyword}, '%')
+                or resource like concat('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+    </sql>
+
+    <!--查询总记录数-->
+    <select id="queryForPageCount" resultType="java.lang.Long">
+        select count(*) from permission
+        <include refid="where_sql"/>
+    </select>
+
+    <!--查询分页数据-->
+    <select id="queryForPage" resultMap="BaseResultMap">
+        select id, name, resource
+        from permission
+        <include refid="where_sql"/>
+        <if test="page!=null">
+            limit #{start}, #{rows}
+        </if>
+    </select>
+
+    <!--根据eid查询用户拥有的权限resource，由于不同角色可能有相同重叠权限，最好加DISTINCT-->
+    <select id="queryResourceByEid" resultType="java.lang.String">
+        select DISTINCT p.resource from permission p
+        LEFT JOIN role_permission rp on rp.p_id = p.id
+        LEFT JOIN role r on r.id = rp.r_id
+        WHERE r.id in (
+            select r_id from emp_role er where er.e_id = #{eid}
+        )
+  </select>
+</mapper>

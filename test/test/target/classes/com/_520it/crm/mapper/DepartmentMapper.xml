@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com._520it.crm.mapper.DepartmentMapper" >
+  <resultMap id="BaseResultMap" type="com._520it.crm.domain.Department" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="sn" property="sn" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+<!--    <result column="mananger_id" property="manangerId" jdbcType="BIGINT" />-->
+<!--    <result column="parent_id" property="parentId" jdbcType="BIGINT" />-->
+    <result column="state" property="state" jdbcType="BIT" />
+  </resultMap>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from department
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <insert id="insert" parameterType="com._520it.crm.domain.Department" useGeneratedKeys="true" keyProperty="id" >
+    insert into department (sn, name)
+    values (#{sn,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR})
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com._520it.crm.domain.Department" >
+    update department
+    set sn = #{sn,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select id, sn, name
+    from department
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, sn, name
+    from department
+  </select>
+
+  <!--查询弹出表单-->
+    <select id="queryForEmp" resultType="com._520it.crm.domain.Department">
+    select id, name from department
+    </select>
+
+  <!--高级查询条件-->
+  <sql id="where_sql">
+    <where>
+      <if test="keyword != null">
+        (
+        d.sn like concat('%', #{keyword}, '%')
+        or d.name like concat('%', #{keyword}, '%')
+        )
+      </if>
+    </where>
+  </sql>
+
+  <!--查询总记录数-->
+  <select id="queryForPageCount" resultType="java.lang.Long">
+    select count(*) from department d
+    <include refid="where_sql"/>
+  </select>
+
+  <!--查询分页数据-->
+  <select id="queryForPage" resultMap="BaseResultMap">
+    select * from department d
+    <include refid="where_sql"/>
+    <if test="page!=null">
+      limit #{start}, #{rows}
+    </if>
+  </select>
+</mapper>
